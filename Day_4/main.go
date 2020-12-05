@@ -7,11 +7,203 @@ import (
 	"strconv"
 )
 
-var details = make(map[string]string)
+
+
+func checkYear(key, data string) bool {
+	value, err := strconv.Atoi(data);
+	if err != nil {
+		panic(err)
+	}
+
+	switch key {
+	case "byr":
+		if value >= 1920 && value <= 2002{
+			return true
+		} else {
+			return false
+		}
+	case "iyr":
+		if value >= 2010 && value <= 2020{
+			return true
+		} else {
+			return false
+		}
+	case "eyr":
+		if value >= 2020 && value <= 2030{
+			return true
+		} else {
+			return false
+		}
+	default:
+		return false
+	}
+}
+
+func checkHgt(data string) bool {
+	value := data[:len(data)-2]
+	unit := data[len(data)-2:]
+	height,_ := strconv.Atoi(value)
+
+	if unit == "in"{
+		if height >= 59 && height <=76 {
+			return true
+		}else{
+			return false
+		}
+	} else if unit == "cm"{
+		if height >= 150 && height <= 193 {
+			return true
+		}else{
+			return false
+		}
+	} else {
+		return false
+	}
+}
+
+func checkHcl(data string) bool{
+	if string(data[0]) == "#" && len(data) == 7{
+		_, err := strconv.ParseUint(data[1:], 16, 64)
+		if err != nil {
+			return false
+		}else {
+			return true
+		}
+	} else {
+		return false
+	}
+}
+
+func checkEcl(data string) bool {
+	if data=="amb"||data=="blu"||data=="brn"||data=="gry"||data=="grn"||data=="hzl"||data=="oth"{
+		return true
+	} else {
+		return false
+	}
+}
+
+func checkPid(data string) bool{
+	if len(data) != 9 {
+		return false
+	} else {
+		_, err:= strconv.Atoi(data)
+		if err != nil {
+			return false
+		} else {
+			return true
+		}
+	}
+}
+
+
+func convertToMap(m map[string]string) bool {
+
+	for key, value := range m {
+		switch key{
+		case "pid":
+			if !checkPid(value){
+				return false
+			}
+		case "byr", "iyr", "eyr":
+			if !checkYear(key, value){
+				return false
+			}
+		case "hgt":
+			if !checkHgt(value) {
+				return false
+			}
+		case "hcl":
+			if !checkHcl(value) {
+				return false
+			}
+		case "ecl":
+			if !checkEcl(value) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+
+func partTwo(data []string) {
+	var valid = 0
+
+	for i := 0; i<len(data); i++ {
+		row:= strings.Fields(data[i])
+
+		cid := strings.Contains(strings.Join(row, " "), "cid:")
+
+		if len(row) == 8 {
+			m := make(map[string]string)
+			for j:=0 ; j<len(row); j++ {
+
+				fields := strings.Split(row[j], ":")
+
+				m[fields[0]] = fields[1]
+			}
+			if convertToMap(m){
+				valid++
+			}
+		}
+
+		if len(row) == 7 && !cid{
+			m := make(map[string]string)
+			for j:=0 ; j<len(row); j++ {
+
+				fields := strings.Split(row[j], ":")
+
+				m[fields[0]] = fields[1]
+			}
+			if convertToMap(m){
+				valid ++
+			}
+		}
+	}
+
+	fmt.Println("second answer is :", valid)
+}
 
 
 func main() {
-	var s = `eyr:2029 iyr:2013
+
+
+	regex, err := regexp.Compile("\n\n")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	var counter = 0
+	var cid bool
+
+	s = regex.ReplaceAllString(s, ",")
+
+	data := strings.Split(s, ",")
+	
+
+	for i := 0; i < len(data); i++ {
+		row := strings.Fields(data[i])
+
+
+		cid = strings.Contains(strings.Join(row, " "), "cid:")
+
+		// fmt.Println(cid)
+		if len(row) == 8 {
+			counter++
+		} 
+		if len(row) == 7 && !(cid) {
+			counter++
+		} else {
+			continue
+		}
+		
+	}
+
+	fmt.Println("first answer is:- ", counter)
+	partTwo(data)
+}
+
+var s = `eyr:2029 iyr:2013
 hcl:#ceb3a1 byr:1939 ecl:blu
 hgt:163cm
 pid:660456119
@@ -1020,102 +1212,5 @@ eyr:2027 ecl:brn hcl:#ceb3a1
 iyr:2010 ecl:oth
 pid:455361219 hgt:153cm eyr:2027 hcl:#6b5442
 byr:1965	
-	`
-
-	regex, err := regexp.Compile("\n\n")
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	var counter = 0
-	var cid bool
-
-	s = regex.ReplaceAllString(s, ",")
-
-	data := strings.Split(s, ",")
-	
-
-	for i := 0; i < len(data); i++ {
-		row := strings.Fields(data[i])
-		// fmt.Println(row)
-		// fmt.Println("size is ", len(row))
-		// fmt.Println(strings.Join(row, " "))
-
-		cid = strings.Contains(strings.Join(row, " "), "cid:")
-
-		// fmt.Println(cid)
-		if len(row) == 8 {
-			counter++
-		} 
-		if len(row) == 7 && !(cid) {
-			counter++
-		} else {
-			continue
-		}
-		
-	}
-
-	// fmt.Println("valid password:- ", counter)
-	partTwo(data)
-}
-
-type Detail struct {
-	Byr int
-	iyr int
-	eyr int
-	hgt int
-	hcl string
-	ecl string
-	pid int
-	cid string
-}
-
-func checkByr(data string) {
-	value, err := strconv.Atoi(data);
-	if err != nil {
-		fmt.Println("error in converting int to string byr", err)
-	}
-	fmt.Println(value)
-}
-
-func checkHgt(data string) {
-	fmt.Println(data)
-	value := data[:len(data)-2]
-	unit := data[len(data)-2:]
-
-	fmt.Println(value)
-	fmt.Println(unit)
-}
-
-func convertToMap(m map[string]string) {
-	for key, value := range m {
-		// fmt.Println("Key:", key)
-		// fmt.Println("Value:", value)
-		// if key == "byr" {
-		// 	checkByr(value)
-		// }
-		if key == "hgt" {
-			checkHgt(value)
-		}
-	}
-}
-
-
-func partTwo(data []string) {
-	for i := 0; i<10; i++ {
-		row:= strings.Fields(data[i])
-		// fmt.Println(row)
-		m := make(map[string]string)
-		for j:=0 ; j<len(row); j++ {
-			// fmt.Println(string(row[j]))
-			fields := strings.Split(row[j], ":")
-			// fmt.Println(string(fields[0]))
-			// fmt.Println(string(fields[1]))
-			m[fields[0]] = fields[1]
-		}
-
-		fmt.Println(m)
-		convertToMap(m)
-	}
-}
+`
 
