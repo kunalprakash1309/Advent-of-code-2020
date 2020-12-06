@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
+	"sort"
 )
 
 func handleInput(fileName string) ([]string, error) {
@@ -47,26 +48,37 @@ func findColumn(data string) int{
     return min
 }
 
+func secondPart(data []int) {
+	sort.Ints(data)
+	for i:=0; i<len(data);i++ {
+		if i + 35 != data[i]{
+			fmt.Println("My previous seat:= ",data[i-1])
+			fmt.Println("My next seat:= ",data[i])
+			fmt.Printf("So my seat is in between these:= %d", (data[i-1] + data[i])/2)
+			break
+		}
+	}
+}
+
 func main() {
 	var highestId int
-	index := 0
 	data, err := handleInput("input.txt")
 	if err != nil {
 		fmt.Println(err)
 	}
-	//data = []string{"FBFBBFFRLR", "BFFFBBFRRR", "FFFBBBFRRR", "BBFFBBFRLL"}
-	// fmt.Println(data)
+
+	var array = []int{}
 	for i:=0; i<len(data); i++ {
 		seatID := (findRow(data[i])*8) + findColumn(data[i])
+		array = append(array, seatID)
 		if seatID == 1 {
 			fmt.Println(seatID)
 		}
 		if seatID > highestId {
 			highestId = seatID
-			index = i
 		}
 	}
 
 	fmt.Println("Highest seat ID:- ", highestId)
-	fmt.Println("Index", index)
+	secondPart(array)
 }
