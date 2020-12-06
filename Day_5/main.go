@@ -50,14 +50,21 @@ func findColumn(data string) int{
 
 func secondPart(data []int) {
 	sort.Ints(data)
-	for i:=0; i<len(data);i++ {
-		if i + 35 != data[i]{
-			fmt.Println("My previous seat:= ",data[i-1])
-			fmt.Println("My next seat:= ",data[i])
-			fmt.Printf("So my seat is in between these:= %d", (data[i-1] + data[i])/2)
-			break
-		}
+	firstValue := data[0]
+	lastValue := data[len(data)-1]
+
+	totalSum := 0
+	actualSum := 0
+
+	for i :=0;i<len(data); i++ {
+		totalSum = totalSum + data[i]
 	}
+
+	for i :=firstValue;i<=lastValue; i++ {
+		actualSum = actualSum + i
+	}
+	fmt.Printf("My seat:= %d", actualSum-totalSum )
+
 }
 
 func main() {
