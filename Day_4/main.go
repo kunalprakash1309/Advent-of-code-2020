@@ -8,7 +8,6 @@ import (
 )
 
 
-
 func checkYear(key, data string) bool {
 	value, err := strconv.Atoi(data);
 	if err != nil {
